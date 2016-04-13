@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd"
+	default-lazy-init="false">
+	
+	<!-- fixedAddress -->
+	<bean id="fixedAddressProvider" class="com.qijiabin.demo.zookeeper.impl.FixedAddressProvider">
+		 <property name="service" value="com.qijiabin.thrift.rpc.demo.HelloSerivce" />
+         <property name="serverAddress" value="192.168.1.87:9000:1,192.168.1.87:9001:2,192.168.1.87:9002:3" />
+	</bean>
+    <bean id="echoSerivce" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory">
+        <property name="maxActive" value="5" />
+        <property name="idleTime" value="10000" />
+        <property name="serverAddressProvider" ref="fixedAddressProvider" />
+    </bean>
+  
+    <!-- zookeeper   -->
+    <!--	
+    <bean id="thriftZookeeper" class="com.qijiabin.demo.zookeeper.ZookeeperFactory" destroy-method="close">
+		<property name="zkHosts" value="192.168.1.66:2181" />
+		<property name="namespace" value="com.qijiabin.hello" />
+		<property name="connectionTimeout" value="3000" />
+		<property name="sessionTimeout" value="3000" />
+		<property name="singleton" value="true" />
+	</bean>
+    <bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory" destroy-method="close">
+        <property name="maxActive" value="5" />
+        <property name="idleTime" value="1800000" />
+        <property name="serverAddressProvider">
+        	<bean class="com.qijiabin.demo.zookeeper.impl.ThriftServerAddressProviderZookeeper">
+        		<property name="service" value="com.qijiabin.thrift.rpc.demo.HelloSerivce"/>
+        		<property name="version" value="1.0.0" />
+        		<property name="zkClient" ref="thriftZookeeper" />
+        	</bean>
+        </property>
+    </bean>
+     -->
+</beans>
