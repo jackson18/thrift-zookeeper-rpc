@@ -41,7 +41,7 @@ public class Client {
 			HelloSerivce.Iface helloSerivce2 = (HelloSerivce.Iface) context.getBean("helloSerivce2");
 			Thread.sleep(1000);
 			System.out.println(Thread.currentThread().getName()+"  "+helloSerivce.hello("hello"));
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 2; i++) {
 				TThread t = new TThread(helloSerivce2);
 				t.start();
 			}

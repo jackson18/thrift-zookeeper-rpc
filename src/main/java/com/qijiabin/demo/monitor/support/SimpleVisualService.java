@@ -118,7 +118,7 @@ public class SimpleVisualService implements VisualService{
                         	data.put(key, value);
                         }
                         summary[0] = Math.max(summary[0], value);
-                        summary[1] = Math.min(summary[1], value);
+                        summary[1] = summary[1] == 0 ? value : Math.min(summary[1], value);
                         sum += value;
                         cnt ++;
                     }

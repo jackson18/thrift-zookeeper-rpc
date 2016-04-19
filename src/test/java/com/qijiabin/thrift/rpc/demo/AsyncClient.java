@@ -1,10 +1,14 @@
 package com.qijiabin.thrift.rpc.demo;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.qijiabin.demo.thrift.AsyncThriftServiceClientProxyFactory;
 import com.qijiabin.thrift.rpc.demo.service.HelloSerivce;
 import com.qijiabin.thrift.rpc.demo.service.HelloSerivce.AsyncClient.hello_call;
 
@@ -31,7 +35,7 @@ public class AsyncClient {
 	 */
 	public static void spring() {
 		try {
-			ApplicationContext context = new ClassPathXmlApplicationContext("spring-context-thrift-client-async.xml");
+			final ApplicationContext context = new ClassPathXmlApplicationContext("spring-context-thrift-client-async.xml");
 			
 			//helloSerivce
 			HelloSerivce.AsyncIface helloSerivce = (HelloSerivce.AsyncIface) context.getBean("helloSerivce");
@@ -44,7 +48,17 @@ public class AsyncClient {
 				}
 			}
 			
-			Thread.sleep(Integer.MAX_VALUE);
+			//关闭连接的钩子
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                	Map<String,AsyncThriftServiceClientProxyFactory> clientMap = context.getBeansOfType(AsyncThriftServiceClientProxyFactory.class);
+                	for(Entry<String, AsyncThriftServiceClientProxyFactory> client : clientMap.entrySet()){
+                		System.out.println("serviceName : "+client.getKey() + ",class obj: "+client.getValue());
+                		client.getValue().close();
+                	}
+                }
+            });
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -60,6 +74,9 @@ public class AsyncClient {
 				System.out.println(response.getResult().toString());
 			} catch (TException e) {
 				e.printStackTrace();
+			} finally {
+				//回收链接资源
+				giveBackResrouce();
 			}
 		}
 

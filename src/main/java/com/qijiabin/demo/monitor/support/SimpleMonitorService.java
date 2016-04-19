@@ -137,10 +137,12 @@ public class SimpleMonitorService implements MonitorService{
 	public void collect(Class<?> clazz, Method method, long start, boolean error) {
 		long end = System.currentTimeMillis(); // 记录结束时间戮
 		long time = end - start;
-    	int concurrent = getConcurrent(clazz, method).get(); // 当前并发数
-    	System.out.println("此次请求耗时：" + time + "毫秒,并发数为："+concurrent+",method:" + method.getName() + ",是否出错:" + error);
-		Statistics statistics = new Statistics(clazz, method, concurrent, time, error);
-		collect(statistics);
+		if (time > 0) {
+			int concurrent = getConcurrent(clazz, method).get(); // 当前并发数
+			System.out.println("此次请求耗时：" + time + "毫秒,并发数为："+concurrent+",method:" + method.getName() + ",是否出错:" + error);
+			Statistics statistics = new Statistics(clazz, method, concurrent, time, error);
+			collect(statistics);
+		}
     }
     
 	/**
