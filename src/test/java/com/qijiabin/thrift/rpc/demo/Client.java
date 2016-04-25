@@ -1,5 +1,8 @@
 package com.qijiabin.thrift.rpc.demo;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -40,10 +43,12 @@ public class Client {
 			HelloSerivce.Iface helloSerivce = (HelloSerivce.Iface) context.getBean("helloSerivce");
 			HelloSerivce.Iface helloSerivce2 = (HelloSerivce.Iface) context.getBean("helloSerivce2");
 			Thread.sleep(1000);
+			
 			System.out.println(Thread.currentThread().getName()+"  "+helloSerivce.hello("hello"));
+			
+			ExecutorService pool = Executors.newFixedThreadPool(8);
 			for (int i = 0; i < 2; i++) {
-				TThread t = new TThread(helloSerivce2);
-				t.start();
+				pool.submit(new TThread(helloSerivce2));
 			}
 			
 			//saySerivce

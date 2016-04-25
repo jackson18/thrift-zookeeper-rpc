@@ -20,8 +20,8 @@ public interface Monitor {
 	
 	String CONCURRENT = "concurrent";
 	
-	String STATISTICS_DIRECTORY = "statistics";
+	String STATISTICS_DIRECTORY = "/opt/monitor/statistics";
 	
-	String CHARTS_DIRECTORY = "charts";
+	String CHARTS_DIRECTORY = "/opt/monitor/charts";
 	
 }

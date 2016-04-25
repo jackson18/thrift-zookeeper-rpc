@@ -8,10 +8,6 @@
 				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd"
 	default-lazy-init="false">
 	
-	<!-- monitor -->
-	<bean id="monitorService" class="com.qijiabin.demo.monitor.support.SimpleMonitorService" />
-    
-    
     <!-- zookeeper   -->
     <bean id="zookeeper" class="com.qijiabin.demo.zookeeper.support.ZookeeperFactory" destroy-method="close">
 		<property name="zkHosts" value="192.168.1.66:2181" />
@@ -37,7 +33,7 @@
         <property name="minIdle" value="0"/>
         <property name="idleTime" value="1800000" />
         <property name="serverAddressProvider" ref="addressProvider"/>
-        <property name="monitorService" ref="monitorService"/>
+        <property name="isMonitor" value="false"/>
     </bean>
     
 </beans>

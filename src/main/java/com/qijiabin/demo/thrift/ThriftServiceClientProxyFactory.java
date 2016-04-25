@@ -11,6 +11,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.qijiabin.demo.monitor.MonitorService;
+import com.qijiabin.demo.monitor.support.SimpleMonitorService;
 import com.qijiabin.demo.thrift.ThriftClientPoolFactory.PoolOperationCallBack;
 import com.qijiabin.demo.zookeeper.AddressProvider;
 
@@ -36,6 +37,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private Class<?> objectClass;
 	private GenericObjectPool<TServiceClient> pool;
 	private MonitorService monitorService;
+	private Boolean isMonitor;
 
 	
 	private PoolOperationCallBack callback = new PoolOperationCallBack() {
@@ -69,20 +71,29 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		poolConfig.minEvictableIdleTimeMillis = idleTime;
 		poolConfig.timeBetweenEvictionRunsMillis = idleTime / 2L;
 		pool = new GenericObjectPool<TServiceClient>(clientPool, poolConfig);
+		if (isMonitor) {
+			this.monitorService = new SimpleMonitorService();
+		}
 		proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				TServiceClient client = pool.borrowObject();
 				long start = System.currentTimeMillis(); // 记录起始时间戮
-				monitorService.getConcurrent(objectClass, method).incrementAndGet(); // 并发计数
+				if (isMonitor) {
+					monitorService.getConcurrent(objectClass, method).incrementAndGet(); // 并发计数
+				}
 				try {
 					return method.invoke(client, args);
 				} catch (Exception e) {
-					monitorService.collect(objectClass, method, start, true);
+					if (isMonitor) {
+						monitorService.collect(objectClass, method, start, true);
+					}
 					throw e;
 				} finally {
-					monitorService.collect(objectClass, method, start, false);
-					monitorService.getConcurrent(objectClass, method).decrementAndGet(); // 并发计数
+					if (isMonitor) {
+						monitorService.collect(objectClass, method, start, false);
+						monitorService.getConcurrent(objectClass, method).decrementAndGet(); // 并发计数
+					}
 					pool.returnObject(client);
 				}
 			}
@@ -124,6 +135,10 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 
 	public void setMonitorService(MonitorService monitorService) {
 		this.monitorService = monitorService;
+	}
+
+	public void setIsMonitor(Boolean isMonitor) {
+		this.isMonitor = isMonitor;
 	}
 	
 }

@@ -116,6 +116,9 @@ public class SimpleVisualService implements VisualService{
                         long value = Long.parseLong(line.substring(index + 1).trim());
                         if (!data.containsKey(key)) {
                         	data.put(key, value);
+                        } else {
+                        	long maxVal = Math.max(data.get(key), value);
+                        	data.put(key, maxVal);
                         }
                         summary[0] = Math.max(summary[0], value);
                         summary[1] = summary[1] == 0 ? value : Math.min(summary[1], value);

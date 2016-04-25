@@ -8,10 +8,6 @@
 				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd"
 	default-lazy-init="false">
 	
-	<!-- monitor -->
-	<bean id="monitorService" class="com.qijiabin.demo.monitor.support.SimpleMonitorService" />
-	
-	
 	<!-- 客户端配置方式一 -->
 	<!-- fixedAddress -->
 	<bean id="fixedAddressProvider" class="com.qijiabin.demo.zookeeper.support.FixedAddressProvider">
@@ -22,7 +18,7 @@
         <property name="maxActive" value="5" />
         <property name="idleTime" value="10000" />
         <property name="serverAddressProvider" ref="fixedAddressProvider" />
-        <property name="monitorService" ref="monitorService"/>
+        <property name="isMonitor" value="true"/>
     </bean>
     
     
@@ -55,13 +51,13 @@
         <property name="maxActive" value="5" />
         <property name="idleTime" value="1800000" />
         <property name="serverAddressProvider" ref="addressProvider"/>
-        <property name="monitorService" ref="monitorService"/>
+        <property name="isMonitor" value="true"/>
     </bean>
     <bean id="saySerivce" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory" destroy-method="close">
         <property name="maxActive" value="5" />
         <property name="idleTime" value="1800000" />
         <property name="serverAddressProvider" ref="addressProvider2"/>
-        <property name="monitorService" ref="monitorService"/>
+        <property name="isMonitor" value="true"/>
     </bean>
     
 </beans>
