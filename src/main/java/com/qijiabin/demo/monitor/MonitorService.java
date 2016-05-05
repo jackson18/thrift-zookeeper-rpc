@@ -3,7 +3,7 @@ package com.qijiabin.demo.monitor;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.qijiabin.demo.monitor.support.Statistics;
+import com.qijiabin.demo.monitor.bean.Statistic;
 
 /**
  * ========================================================
@@ -23,7 +23,7 @@ public interface MonitorService extends Monitor{
 	 * 记录调用的成功次数，失败次数，成功调用总耗时，平均时间将用总耗时除以成功次数
 	 * @param statistics
 	 */
-    public void collect(Statistics statistics);
+    public void collect(Statistic statistic);
     
     /**
      * 监控数据采集
