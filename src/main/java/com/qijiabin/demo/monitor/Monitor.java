@@ -12,4 +12,6 @@ package com.qijiabin.demo.monitor;
  */
 public interface Monitor {
 
+	public static final String HTTP_GET_URL = "http://localhost:8080/moji-monitor/add";
+	
 }

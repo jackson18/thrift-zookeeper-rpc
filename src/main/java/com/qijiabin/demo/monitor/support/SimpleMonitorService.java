@@ -1,6 +1,8 @@
 package com.qijiabin.demo.monitor.support;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,12 +10,17 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.qijiabin.demo.monitor.MonitorService;
 import com.qijiabin.demo.monitor.bean.Statistic;
-import com.qijiabin.demo.monitor.dao.SqlMapClientManager;
 
 /**
  * ========================================================
@@ -33,6 +40,7 @@ public class SimpleMonitorService implements MonitorService{
 	private final Thread writeThread;
 	private volatile boolean running = true;
 	private static SimpleMonitorService INSTANCE = null;
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     
 
 	public static SimpleMonitorService getInstance() {
@@ -68,7 +76,41 @@ public class SimpleMonitorService implements MonitorService{
 	 */
 	private void write() throws Exception {
 		Statistic entity = queue.take();
-		SqlMapClientManager.getClient().insert("insertStatistic", entity);
+		StringBuilder sb = new StringBuilder();
+		sb.append("?service=").append(entity.getService())
+		.append("&method=").append(entity.getMethod())
+		.append("&time=").append(entity.getTime())
+		.append("&concurrent=").append(entity.getConcurrent())
+		.append("&createTime=").append(sdf.format(entity.getCreateTime()))
+		.append("&isError=").append(entity.getIsError());
+		String loginUrl = HTTP_GET_URL + sb.toString();
+		//使用http请求写入数据库
+		requestGet(loginUrl);
+	}
+	
+	/**
+	 * http get请求
+	 * @param urlWithParams
+	 */
+	public static void requestGet(String urlWithParams) {
+        try {
+			CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+			HttpGet httpget = new HttpGet(urlWithParams);   
+			//配置请求的超时设置
+			RequestConfig requestConfig = RequestConfig.custom()  
+			        .setConnectionRequestTimeout(100)
+			        .setConnectTimeout(100)  
+			        .build();  
+			httpget.setConfig(requestConfig); 
+			httpclient.execute(httpget);        
+			httpget.releaseConnection();
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -91,12 +133,10 @@ public class SimpleMonitorService implements MonitorService{
 	public void collect(Class<?> clazz, Method method, long start, boolean error) {
 		long end = System.currentTimeMillis(); // 记录结束时间戮
 		long time = end - start;
-		if (time > 0) {
-			int concurrent = getConcurrent(clazz, method).get(); // 当前并发数
-			int isError = error?1:0;
-			Statistic entity = new Statistic(clazz.getName(), method.getName(), time, concurrent, new Date(), isError);
-			collect(entity);
-		}
+		int concurrent = getConcurrent(clazz, method).get(); // 当前并发数
+		int isError = error?1:0;
+		Statistic entity = new Statistic(clazz.getName(), method.getName(), time, concurrent, new Date(), isError);
+		collect(entity);
     }
     
 	/**

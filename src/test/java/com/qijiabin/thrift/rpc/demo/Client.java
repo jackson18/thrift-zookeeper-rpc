@@ -47,7 +47,7 @@ public class Client {
 			System.out.println(Thread.currentThread().getName()+"  "+helloSerivce.hello("hello"));
 			
 			ExecutorService pool = Executors.newFixedThreadPool(8);
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 2; i++) {
 				pool.submit(new TThread(helloSerivce2));
 			}
 			
@@ -72,8 +72,8 @@ public class Client {
 
 		public void run() {
 			try {
-				for (int i = 0; i < 50; i++) {
-					System.out.println(Thread.currentThread().getName()+"  "+helloSerivce.hello("hello222"));
+				for (int i = 0; i < 10; i++) {
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.hello("hello222"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
