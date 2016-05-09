@@ -11,9 +11,6 @@ import org.apache.thrift.transport.TTransport;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.qijiabin.thrift.rpc.demo.service.HelloSerivce;
-import com.qijiabin.thrift.rpc.demo.service.SaySerivce;
-
 /**
  * ========================================================
  * 日 期：2016年4月13日 下午12:15:43
@@ -31,6 +28,24 @@ public class Client {
 		simple();
 		spring();
 	}
+	
+	/**
+	 * socket测试
+	 */
+	public static void simple() {
+		try {
+			TSocket socket = new TSocket("192.168.1.87", 9000);
+			TTransport transport = new TFramedTransport(socket);
+			TProtocol protocol = new TBinaryProtocol(transport);
+			HelloWorldService.Client client = new HelloWorldService.Client(protocol);
+			transport.open();
+			System.out.println(client.sayHello("helloword"));
+			Thread.sleep(3000);
+			transport.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 并发测试
@@ -40,22 +55,13 @@ public class Client {
 			ApplicationContext context = new ClassPathXmlApplicationContext("spring-context-thrift-client.xml");
 			
 			//helloSerivce
-			HelloSerivce.Iface helloSerivce = (HelloSerivce.Iface) context.getBean("helloSerivce");
-			HelloSerivce.Iface helloSerivce2 = (HelloSerivce.Iface) context.getBean("helloSerivce2");
+			HelloWorldService.Iface helloSerivce = (HelloWorldService.Iface) context.getBean("helloSerivce2");
 			Thread.sleep(1000);
-			
-			System.out.println(Thread.currentThread().getName()+"  "+helloSerivce.hello("hello"));
 			
 			ExecutorService pool = Executors.newFixedThreadPool(8);
 			for (int i = 0; i < 2; i++) {
-				pool.submit(new TThread(helloSerivce2));
+				pool.submit(new TThread(helloSerivce));
 			}
-			
-			//saySerivce
-			SaySerivce.Iface saySerivce = (SaySerivce.Iface) context.getBean("saySerivce");
-			Thread.sleep(1000);
-			System.out.println(Thread.currentThread().getName()+"  "+saySerivce.say("say"));
-
 			
 			Thread.sleep(Integer.MAX_VALUE);
 		} catch (Exception e) {
@@ -64,16 +70,16 @@ public class Client {
 	}
 
 	static class TThread extends Thread {
-		HelloSerivce.Iface helloSerivce;
+		HelloWorldService.Iface helloSerivce;
 
-		TThread(HelloSerivce.Iface service) {
+		TThread(HelloWorldService.Iface service) {
 			helloSerivce = service;
 		}
 
 		public void run() {
 			try {
 				for (int i = 0; i < 10; i++) {
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.hello("hello222"));
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.sayHello("hello222"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -81,21 +87,4 @@ public class Client {
 		}
 	}
 
-	/**
-	 * socket测试
-	 */
-	public static void simple() {
-		try {
-			TSocket socket = new TSocket("192.168.1.87", 9000);
-			TTransport transport = new TFramedTransport(socket);
-			TProtocol protocol = new TBinaryProtocol(transport);
-			HelloSerivce.Client client = new HelloSerivce.Client(protocol);
-			transport.open();
-			System.out.println(client.hello("helloword"));
-			Thread.sleep(3000);
-			transport.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }

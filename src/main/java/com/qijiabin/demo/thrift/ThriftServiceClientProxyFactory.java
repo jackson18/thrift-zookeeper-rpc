@@ -7,11 +7,11 @@ import java.lang.reflect.Proxy;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.thrift.TServiceClient;
 import org.apache.thrift.TServiceClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.qijiabin.demo.monitor.MonitorService;
-import com.qijiabin.demo.monitor.support.SimpleMonitorService;
 import com.qijiabin.demo.thrift.ThriftClientPoolFactory.PoolOperationCallBack;
 import com.qijiabin.demo.zookeeper.AddressProvider;
 
@@ -28,6 +28,7 @@ import com.qijiabin.demo.zookeeper.AddressProvider;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ThriftServiceClientProxyFactory implements FactoryBean, InitializingBean {
 
+	private static final Logger log = LoggerFactory.getLogger(ThriftServiceClientProxyFactory.class);
 	// 最大活跃连接数
 	private Integer maxActive = 32;
 	// 连接空闲时间，默认3分钟，-1：关闭空闲检测
@@ -36,19 +37,17 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private Object proxyClient;
 	private Class<?> objectClass;
 	private GenericObjectPool<TServiceClient> pool;
-	private MonitorService monitorService;
-	private Boolean isMonitor;
 
 	
 	private PoolOperationCallBack callback = new PoolOperationCallBack() {
 		@Override
 		public void make(TServiceClient client) {
-			System.out.println("create");
+			log.info("create");
 		}
 
 		@Override
 		public void destroy(TServiceClient client) {
-			System.out.println("destroy");
+			log.info("destroy");
 		}
 	};
 	
@@ -71,29 +70,15 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		poolConfig.minEvictableIdleTimeMillis = idleTime;
 		poolConfig.timeBetweenEvictionRunsMillis = idleTime / 2L;
 		pool = new GenericObjectPool<TServiceClient>(clientPool, poolConfig);
-		if (isMonitor) {
-			this.monitorService = new SimpleMonitorService();
-		}
 		proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				TServiceClient client = pool.borrowObject();
-				long start = System.currentTimeMillis(); // 记录起始时间戮
-				if (isMonitor) {
-					monitorService.getConcurrent(objectClass, method).incrementAndGet(); // 并发计数
-				}
 				try {
 					return method.invoke(client, args);
 				} catch (Exception e) {
-					if (isMonitor) {
-						monitorService.collect(objectClass, method, start, true);
-					}
 					throw e;
 				} finally {
-					if (isMonitor) {
-						monitorService.collect(objectClass, method, start, false);
-						monitorService.getConcurrent(objectClass, method).decrementAndGet(); // 并发计数
-					}
 					pool.returnObject(client);
 				}
 			}
@@ -133,12 +118,4 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		this.serverAddressProvider = serverAddressProvider;
 	}
 
-	public void setMonitorService(MonitorService monitorService) {
-		this.monitorService = monitorService;
-	}
-
-	public void setIsMonitor(Boolean isMonitor) {
-		this.isMonitor = isMonitor;
-	}
-	
 }

@@ -17,6 +17,8 @@ import com.facebook.nifty.core.NettyServerConfigBuilder;
 import com.facebook.nifty.core.NettyServerTransport;
 import com.facebook.nifty.core.ThriftServerDefBuilder;
 import com.qijiabin.demo.exception.ThriftException;
+import com.qijiabin.demo.monitor.ServerBase;
+import com.qijiabin.demo.monitor.ServiceProxy;
 import com.qijiabin.demo.zookeeper.AddressRegister;
 import com.qijiabin.demo.zookeeper.IPResolve;
 import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
@@ -30,11 +32,11 @@ import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
  * ========================================================
  * 修订日期     修订人    描述
  */
-public class ThriftServiceServerFactory implements InitializingBean, Closeable {
+public class ThriftServiceServerFactory extends ServerBase implements InitializingBean, Closeable {
 	
 	private static final int BOSS_THREAD_DEFAULT_COUNT = 1;
 	private static final int WORKER_THREAD_DEFAULT_COUNT = 4;
-	private static final Boolean zooniftyShutdownHook = false;
+	private static final Boolean ZK_NIFTY_SHUTDOWN_HOOK = false;
 	//服务名称
 	private String name;
 	private String hostname = null;
@@ -92,7 +94,7 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 					continue;
 				}
 				Constructor<?> constructor = pclass.getConstructor(clazz);
-				processor = (TProcessor) constructor.newInstance(service);
+				processor = (TProcessor) constructor.newInstance(new ServiceProxy(this).wrapper(service));
 				break;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -112,7 +114,7 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 			addressRegister.register(serviceName, version, hostname);
 		}
 		//清理资源钩子
-		if(zooniftyShutdownHook) {
+		if (ZK_NIFTY_SHUTDOWN_HOOK) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 	            public void run() {  
 	                try {  
