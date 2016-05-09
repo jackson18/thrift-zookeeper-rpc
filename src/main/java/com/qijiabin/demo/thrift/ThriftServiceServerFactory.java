@@ -94,7 +94,7 @@ public class ThriftServiceServerFactory extends ServerBase implements Initializi
 					continue;
 				}
 				Constructor<?> constructor = pclass.getConstructor(clazz);
-				processor = (TProcessor) constructor.newInstance(new ServiceProxy(this).wrapper(service));
+				processor = (TProcessor) constructor.newInstance(new ServiceProxy(this).wrapper(service, name, version));
 				break;
 			} catch (Exception e) {
 				e.printStackTrace();

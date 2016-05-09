@@ -4,18 +4,18 @@ import org.apache.thrift.TException;
 
 import com.qijiabin.demo.monitor.thrift.MonitorServiceBase;
 
+/**
+ * ========================================================
+ * 日 期：2016年5月9日 下午6:17:46
+ * 作 者：qijiabin
+ * 版 本：1.0.0
+ * 类说明：服务实现类
+ * TODO
+ * ========================================================
+ * 修订日期     修订人    描述
+ */
 public class HelloWorldServiceImpl extends MonitorServiceBase implements HelloWorldService.Iface {
 	
-	private String name;
-	private String version;
-	
-	public HelloWorldServiceImpl() {
-	}
-	
-	public HelloWorldServiceImpl(String name, String version) {
-		super(name, version);
-	}
-
 	@Override
 	public String sayHello(String username) throws TException {
 		try {
@@ -26,20 +26,4 @@ public class HelloWorldServiceImpl extends MonitorServiceBase implements HelloWo
 		return "hello : " + username;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-	
 }

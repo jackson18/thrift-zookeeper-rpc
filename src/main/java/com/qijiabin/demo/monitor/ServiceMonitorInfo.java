@@ -19,6 +19,8 @@ import com.qijiabin.demo.monitor.thrift.BizMethodInvokeInfo;
  */
 public class ServiceMonitorInfo {
 	
+	private String serviceName;
+	private String serviceVersion;
 	//服务调用总次数
 	private long serviceCount=0;
 	//业务方法列表
@@ -26,10 +28,6 @@ public class ServiceMonitorInfo {
 	//业务方法调用信息
 	private final ConcurrentHashMap<String, BizMethodInvokeInfo> bizMethodInvokeInfoMap = new ConcurrentHashMap<String, BizMethodInvokeInfo>();
    
-	
-	public long getServiceCount() {
-		return serviceCount;
-	}
 	
     private synchronized void incrementServiceCount(){
     	this.serviceCount++;
@@ -89,6 +87,30 @@ public class ServiceMonitorInfo {
     public boolean isBizMethod(String method){
     	return this.bizMethodInvokeInfoMap.containsKey(method);
     }
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
+	public String getServiceVersion() {
+		return serviceVersion;
+	}
+
+	public void setServiceVersion(String serviceVersion) {
+		this.serviceVersion = serviceVersion;
+	}
+	
+	public long getServiceCount() {
+		return serviceCount;
+	}
+
+	public void setServiceCount(long serviceCount) {
+		this.serviceCount = serviceCount;
+	}
     
 }
 

@@ -34,12 +34,15 @@ public class ServiceProxy {
 
 	/**
 	 * 生成代理类
-	 * 
 	 * @param service
+	 * @param serviceName
+	 * @param serviceVersion
 	 * @return
 	 */
-	public Object wrapper(Object service) {
+	public Object wrapper(Object service, String serviceName, String serviceVersion) {
 		MonitorServiceBase msb = (MonitorServiceBase) service;
+		serviceInfo.setServiceName(serviceName);
+		serviceInfo.setServiceVersion(serviceVersion);
 		msb.setServiceInfo(serviceInfo);
 		msb.setServer(server);
 		registerServiceInfo(service);
@@ -49,7 +52,6 @@ public class ServiceProxy {
 
 	/**
 	 * 注册服务方法信息，主要是是业务方法，便于后面监控
-	 * 
 	 * @param service
 	 */
 	private void registerServiceInfo(Object service) {
@@ -58,7 +60,7 @@ public class ServiceProxy {
 			Class<?> iface = interfaces[i];
 			Method[] methods = iface.getMethods();
 			for (Method m : methods) {
-				if (isFanServiceIfaceMethod(m)) {
+				if (isMonitorServiceIfaceMethod(m)) {
 					continue;
 				}
 				String methodName = m.getName();
@@ -68,7 +70,7 @@ public class ServiceProxy {
 				biz.setArgsNum((byte) type.length);
 				biz.setArgsType(getArgsType(type));
 				if (log.isDebugEnabled()) {
-					log.debug("service registerServiceInfo=" + biz.toString());
+					log.debug("***********--->service registerServiceInfo:{}", biz.toString());
 				}
 				serviceInfo.addServiceBizMethod(biz);
 			}
@@ -85,7 +87,7 @@ public class ServiceProxy {
 
 	private Class<MonitorService.Iface> iface = MonitorService.Iface.class;
 
-	private boolean isFanServiceIfaceMethod(Method m) {
+	private boolean isMonitorServiceIfaceMethod(Method m) {
 		Method[] methods = iface.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].equals(m)) {

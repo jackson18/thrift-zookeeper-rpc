@@ -21,7 +21,7 @@ import com.qijiabin.demo.monitor.thrift.MonitorServiceBase;
 public class ServiceProxyHandler implements InvocationHandler{
 	
 	private static final Logger log = LoggerFactory.getLogger(ServiceProxyHandler.class);
-	private  Object  service;
+	private Object service;
 	
 	
     protected ServiceProxyHandler(Object service){
@@ -30,12 +30,12 @@ public class ServiceProxyHandler implements InvocationHandler{
     
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		MonitorServiceBase  msb =  (MonitorServiceBase)service;
+		MonitorServiceBase msb = (MonitorServiceBase)service;
 		ServiceMonitorInfo serviceInfo = msb.getServiceInfo();
 		if(log.isDebugEnabled()){
 			if(args!=null) {
 				for(int i=0;i<args.length;i++){
-					log.debug("service arg."+i+"="+(args[i]==null?"null":args[i].toString()));
+					log.debug("*************--->service arg."+i+"="+(args[i]==null?"null":args[i].toString()));
 				}
 			}
 		}
@@ -53,11 +53,11 @@ public class ServiceProxyHandler implements InvocationHandler{
 		if(serviceInfo.isBizMethod(method.getName())){
 			serviceInfo.updateBizMethodInvokeInfo(method.getName(), true, (endTime-startTime));
 			if(log.isDebugEnabled()) {
-				log.debug("call "+method.getName()+" cost time="+(endTime-startTime));
+				log.debug("*************--->call "+method.getName()+" cost time="+(endTime-startTime));
 			}
 		}
 		if(log.isDebugEnabled()) {
-			log.debug("call "+method.getName()+"  result="+(result==null?"null":result.toString()));
+			log.debug("************--->call "+method.getName()+"  result="+(result==null?"null":result.toString()));
 		}
 		return result;
 	}

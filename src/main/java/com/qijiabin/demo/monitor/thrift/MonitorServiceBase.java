@@ -14,39 +14,24 @@ import com.qijiabin.demo.monitor.ServiceMonitorInfo;
  * 作 者：jackson
  * 版 本：1.0.0
  * 类说明：服务监控基类
- * TODO
+ * 服务实现类需要继承此类
  * ========================================================
  * 修订日期     修订人    描述
  */
 public abstract class MonitorServiceBase implements MonitorService.Iface {
 	
-	private String serviceName;
-	private String serviceVersion;
 	private ServiceMonitorInfo serviceInfo;
-	private ServerBase  server;
+	private ServerBase server;
 	
-	
-	protected MonitorServiceBase(){
-		init("","");
-	}
-	
-	protected MonitorServiceBase(String name, String version) {
-		init(name,version);
-	}
-	
-	private void init(String name, String version){
-		this.serviceName = name;
-		this.serviceVersion = version;
-	}
 	
 	@Override
 	public String getName() throws TException {
-		return this.serviceName;
+		return this.serviceInfo.getServiceName();
 	}
 
 	@Override
 	public String getVersion() throws TException {
-		return this.serviceVersion;
+		return this.serviceInfo.getServiceVersion();
 	}
 
 	@Override

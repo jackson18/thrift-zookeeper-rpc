@@ -40,7 +40,7 @@ public class Client {
 			HelloWorldService.Client client = new HelloWorldService.Client(protocol);
 			transport.open();
 			System.out.println(client.sayHello("helloword"));
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 			transport.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -53,13 +53,11 @@ public class Client {
 	public static void spring() {
 		try {
 			ApplicationContext context = new ClassPathXmlApplicationContext("spring-context-thrift-client.xml");
-			
-			//helloSerivce
 			HelloWorldService.Iface helloSerivce = (HelloWorldService.Iface) context.getBean("helloSerivce2");
 			Thread.sleep(1000);
 			
 			ExecutorService pool = Executors.newFixedThreadPool(8);
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 1; i++) {
 				pool.submit(new TThread(helloSerivce));
 			}
 			
@@ -78,8 +76,17 @@ public class Client {
 
 		public void run() {
 			try {
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 1; i++) {
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.sayHello("hello222"));
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getName());
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getVersion());
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getServiceBizMethods());
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodInvokeInfo("sayHello"));
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodsInvokeInfo());
+					
+					helloSerivce.setOption("testOption", "abc");
+					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getOptions());
+					
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -88,3 +95,4 @@ public class Client {
 	}
 
 }
+

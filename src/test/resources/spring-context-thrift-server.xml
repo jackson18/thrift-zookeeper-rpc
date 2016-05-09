@@ -25,14 +25,10 @@
 	</bean>
 	
 	
-	<bean id="helloSerivceImpl" class="com.qijiabin.thrift.rpc.demo.HelloWorldServiceImpl">
-		<property name="name" value="helloService" />
-		<property name="version" value="1.0.0" />
-	</bean>
+	<bean id="helloSerivceImpl" class="com.qijiabin.thrift.rpc.demo.HelloWorldServiceImpl"/>
 	
 	
-	<bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceServerFactory"
-		destroy-method="close">
+	<bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceServerFactory" destroy-method="close">
 		<property name="service" ref="helloSerivceImpl" />
 		<property name="name" value="HelloService"/>
 		<property name="port" value="9000" />
