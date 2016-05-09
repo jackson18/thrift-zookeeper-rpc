@@ -83,10 +83,6 @@ public class Client {
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getServiceBizMethods());
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodInvokeInfo("sayHello"));
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodsInvokeInfo());
-					
-					helloSerivce.setOption("testOption", "abc");
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getOptions());
-					
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

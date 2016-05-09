@@ -17,7 +17,6 @@ import com.facebook.nifty.core.NettyServerConfigBuilder;
 import com.facebook.nifty.core.NettyServerTransport;
 import com.facebook.nifty.core.ThriftServerDefBuilder;
 import com.qijiabin.demo.exception.ThriftException;
-import com.qijiabin.demo.monitor.ServerBase;
 import com.qijiabin.demo.monitor.ServiceProxy;
 import com.qijiabin.demo.zookeeper.AddressRegister;
 import com.qijiabin.demo.zookeeper.IPResolve;
@@ -32,7 +31,7 @@ import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
  * ========================================================
  * 修订日期     修订人    描述
  */
-public class ThriftServiceServerFactory extends ServerBase implements InitializingBean, Closeable {
+public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 	
 	private static final int BOSS_THREAD_DEFAULT_COUNT = 1;
 	private static final int WORKER_THREAD_DEFAULT_COUNT = 4;
@@ -94,7 +93,7 @@ public class ThriftServiceServerFactory extends ServerBase implements Initializi
 					continue;
 				}
 				Constructor<?> constructor = pclass.getConstructor(clazz);
-				processor = (TProcessor) constructor.newInstance(new ServiceProxy(this).wrapper(service, name, version));
+				processor = (TProcessor) constructor.newInstance(new ServiceProxy().wrapper(service, name, version));
 				break;
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -27,7 +27,4 @@ service MonitorService {
 
   BizMethodInvokeInfo getBizMethodInvokeInfo(1:string methodName)
 
-  void setOption(1: string key, 2: string value)
-
-  map<string, string> getOptions()
 }

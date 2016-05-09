@@ -26,11 +26,6 @@ public class ServiceProxy {
 
 	private static final Logger log = LoggerFactory.getLogger(ServiceProxy.class.getName());
 	private ServiceMonitorInfo serviceInfo = new ServiceMonitorInfo();
-	private ServerBase server;
-
-	public ServiceProxy(ServerBase server) {
-		this.server = server;
-	}
 
 	/**
 	 * 生成代理类
@@ -44,7 +39,6 @@ public class ServiceProxy {
 		serviceInfo.setServiceName(serviceName);
 		serviceInfo.setServiceVersion(serviceVersion);
 		msb.setServiceInfo(serviceInfo);
-		msb.setServer(server);
 		registerServiceInfo(service);
 		return Proxy.newProxyInstance(service.getClass().getClassLoader(), service.getClass().getInterfaces(),
 				new ServiceProxyHandler(service));

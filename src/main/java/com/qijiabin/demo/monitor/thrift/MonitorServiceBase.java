@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.thrift.TException;
 
-import com.qijiabin.demo.monitor.ServerBase;
 import com.qijiabin.demo.monitor.ServiceMonitorInfo;
 
 /**
@@ -21,8 +20,6 @@ import com.qijiabin.demo.monitor.ServiceMonitorInfo;
 public abstract class MonitorServiceBase implements MonitorService.Iface {
 	
 	private ServiceMonitorInfo serviceInfo;
-	private ServerBase server;
-	
 	
 	@Override
 	public String getName() throws TException {
@@ -49,24 +46,6 @@ public abstract class MonitorServiceBase implements MonitorService.Iface {
 		return this.serviceInfo.getBizMethodInvokeInfoMap().get(methodName);
 	}
 
-	@Override
-	public void setOption(String key, String value) throws TException {
-		this.server.setOption(key, value);
-	}
-
-	@Override
-	public Map<String, String> getOptions() throws TException {
-		return this.server.getOptions();
-	}
-	
-	public ServerBase getServer() {
-		return server;
-	}
-	
-	public void setServer(ServerBase server) {
-		this.server = server;
-	}
-	
 	public ServiceMonitorInfo getServiceInfo() {
 		return serviceInfo;
 	}
