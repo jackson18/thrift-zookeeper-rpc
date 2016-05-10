@@ -18,6 +18,8 @@ import com.facebook.nifty.core.NettyServerTransport;
 import com.facebook.nifty.core.ThriftServerDefBuilder;
 import com.qijiabin.demo.exception.ThriftException;
 import com.qijiabin.demo.monitor.ServiceProxy;
+import com.qijiabin.demo.monitor.statistic.MonitorService;
+import com.qijiabin.demo.monitor.statistic.support.SimpleMonitorService;
 import com.qijiabin.demo.zookeeper.AddressRegister;
 import com.qijiabin.demo.zookeeper.IPResolve;
 import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
@@ -54,6 +56,8 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 	private ThriftServerDefBuilder thriftServerDefBuilder;
 	// NettyServer
 	private NettyServerTransport server = null;
+	private MonitorService monitorService;
+	private Boolean isMonitor;
 	
 
 	/**
@@ -61,6 +65,9 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		if (isMonitor) {
+			this.monitorService = new SimpleMonitorService();
+		}
 		if (ipResolve == null) {
 			ipResolve = new LocalNetworkIPResolve();
 		}
@@ -93,7 +100,7 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 					continue;
 				}
 				Constructor<?> constructor = pclass.getConstructor(clazz);
-				processor = (TProcessor) constructor.newInstance(new ServiceProxy().wrapper(service, name, version));
+				processor = (TProcessor) constructor.newInstance(new ServiceProxy().wrapper(service, name, version, monitorService, isMonitor));
 				break;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -183,6 +190,14 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Boolean getIsMonitor() {
+		return isMonitor;
+	}
+
+	public void setIsMonitor(Boolean isMonitor) {
+		this.isMonitor = isMonitor;
 	}
 
 }

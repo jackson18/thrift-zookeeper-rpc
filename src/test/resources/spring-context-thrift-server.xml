@@ -32,5 +32,6 @@
 		<property name="version" value="1.0.0" />
 		<property name="weight" value="1" />
 		<property name="addressRegister" ref="addressRegister" />
+		<property name="isMonitor" value="true"/>
 	</bean>
 </beans>

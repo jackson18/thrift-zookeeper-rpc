@@ -2,6 +2,8 @@ package com.qijiabin.demo.monitor;
 
 import java.lang.reflect.Proxy;
 
+import com.qijiabin.demo.monitor.statistic.MonitorService;
+
 /**
  * ========================================================
  * 日 期：2016年5月8日 上午10:58:44
@@ -21,11 +23,11 @@ public class ServiceProxy {
 	 * @param serviceVersion
 	 * @return
 	 */
-	public Object wrapper(Object service, String serviceName, String serviceVersion) {
+	public Object wrapper(Object service, String serviceName, String serviceVersion, MonitorService monitorService, boolean isMonitor) {
 		return Proxy.newProxyInstance(
 				service.getClass().getClassLoader(), 
 				service.getClass().getInterfaces(),
-				new ServiceProxyHandler(service, serviceName, serviceVersion));
+				new ServiceProxyHandler(service, serviceName, serviceVersion, monitorService, isMonitor));
 	}
 
 }
