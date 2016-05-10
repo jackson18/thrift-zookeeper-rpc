@@ -2,8 +2,6 @@ package com.qijiabin.thrift.rpc.demo;
 
 import org.apache.thrift.TException;
 
-import com.qijiabin.demo.monitor.thrift.MonitorServiceBase;
-
 /**
  * ========================================================
  * 日 期：2016年5月9日 下午6:17:46
@@ -14,7 +12,7 @@ import com.qijiabin.demo.monitor.thrift.MonitorServiceBase;
  * ========================================================
  * 修订日期     修订人    描述
  */
-public class HelloWorldServiceImpl extends MonitorServiceBase implements HelloWorldService.Iface {
+public class HelloWorldServiceImpl implements HelloWorldService.Iface {
 	
 	@Override
 	public String sayHello(String username) throws TException {

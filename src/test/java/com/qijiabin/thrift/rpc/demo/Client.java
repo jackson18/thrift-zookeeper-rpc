@@ -78,11 +78,6 @@ public class Client {
 			try {
 				for (int i = 0; i < 1; i++) {
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.sayHello("hello222"));
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getName());
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getVersion());
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getServiceBizMethods());
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodInvokeInfo("sayHello"));
-					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.getBizMethodsInvokeInfo());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

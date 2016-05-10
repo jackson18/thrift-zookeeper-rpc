@@ -14,6 +14,7 @@
 		 <property name="service" value="com.qijiabin.thrift.rpc.demo.HelloWorldService" />
          <property name="serverAddress" value="192.168.1.87:9000:1,192.168.1.87:9001:2" />
 	</bean>
+	
     <bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory">
         <property name="maxActive" value="5" />
         <property name="idleTime" value="10000" />
@@ -30,7 +31,6 @@
 		<property name="sessionTimeout" value="3000" />
 		<property name="singleton" value="true" />
 	</bean>
-	
 	
 	<!-- addressProvider -->
 	<bean id="addressProvider" class="com.qijiabin.demo.zookeeper.support.ZookeeperAddressProvider">

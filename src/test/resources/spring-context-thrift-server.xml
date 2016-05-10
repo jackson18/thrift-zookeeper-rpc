@@ -19,14 +19,11 @@
 		<property name="singleton" value="true" />
 	</bean>
 	
-	
 	<bean id="addressRegister" class="com.qijiabin.demo.zookeeper.support.ZookeeperAddressRegister" destroy-method="close">
 		<property name="zkClient" ref="zookeeper" />
 	</bean>
 	
-	
 	<bean id="helloSerivceImpl" class="com.qijiabin.thrift.rpc.demo.HelloWorldServiceImpl"/>
-	
 	
 	<bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceServerFactory" destroy-method="close">
 		<property name="service" ref="helloSerivceImpl" />
