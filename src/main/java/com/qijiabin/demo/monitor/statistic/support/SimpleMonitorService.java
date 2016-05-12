@@ -34,19 +34,14 @@ public class SimpleMonitorService implements MonitorService{
 	private static final Logger logger = LoggerFactory.getLogger(SimpleMonitorService.class);
 	private final ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<String, AtomicInteger>();
 	private final BlockingQueue<Statistics> queue = new LinkedBlockingQueue<Statistics>(100000);
-	private volatile boolean running = true;
-	private static SimpleMonitorService INSTANCE = null;
 	// 定时任务执行器
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
-	public static SimpleMonitorService getInstance() {
-        return INSTANCE;
-    }
 	
 	public void start() {
         Thread writeThread = new Thread(new Runnable() {
             public void run() {
-                while (running) {
+                while (true) {
                     try {
                         write(); // 记录统计日志
                     } catch (Throwable t) { // 防御性容错
@@ -72,7 +67,6 @@ public class SimpleMonitorService implements MonitorService{
                 }
             }
         }, 1, 300, TimeUnit.SECONDS);
-        INSTANCE = this;
 	}
 	
 	/**
