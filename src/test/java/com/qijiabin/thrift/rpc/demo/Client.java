@@ -29,11 +29,11 @@ public class Client {
 	public static void spring() {
 		try {
 			ApplicationContext context = new ClassPathXmlApplicationContext("spring-context-thrift-client.xml");
-			HelloWorldService.Iface helloSerivce = (HelloWorldService.Iface) context.getBean("helloSerivce2");
 			Thread.sleep(1000);
 			
+			HelloWorldService.Iface helloSerivce = (HelloWorldService.Iface) context.getBean("helloSerivce2");
 			ExecutorService pool = Executors.newFixedThreadPool(8);
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 1; i++) {
 				pool.submit(new TThread(helloSerivce));
 			}
 			
@@ -52,7 +52,7 @@ public class Client {
 
 		public void run() {
 			try {
-				for (int i = 0; i < 100; i++) {
+				for (int i = 0; i < 1; i++) {
 					System.out.println(Thread.currentThread().getName()+" "+(i+1)+" "+helloSerivce.sayHello("hello222"));
 				}
 			} catch (Exception e) {

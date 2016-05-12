@@ -18,6 +18,11 @@ import com.qijiabin.demo.monitor.statistic.support.Statistics;
 public interface MonitorService extends Monitor{
 	
 	/**
+	 * 启动监控服务
+	 */
+	public void start();
+	
+	/**
 	 * 监控数据采集
 	 * 记录监控来源主机，应用，接口，方法信息
 	 * 记录调用的成功次数，失败次数，成功调用总耗时，平均时间将用总耗时除以成功次数

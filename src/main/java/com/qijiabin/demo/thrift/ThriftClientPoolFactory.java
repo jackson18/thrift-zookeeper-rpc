@@ -67,17 +67,20 @@ public class ThriftClientPoolFactory extends BasePoolableObjectFactory<TServiceC
 
 	@Override
 	public TServiceClient makeObject() throws Exception {
+		TServiceClient client = null;
 		InetSocketAddress address = serverAddressProvider.selector();
-		TSocket tsocket = new TSocket(address.getHostName(), address.getPort());
-		TTransport transport = new TFramedTransport(tsocket);
-		TProtocol protocol = new TBinaryProtocol(transport);
-		TServiceClient client = this.clientFactory.getClient(protocol);
-		transport.open();
-		if (callback != null) {
-			try {
-				callback.make(client);
-			} catch (Exception e) {
-				e.printStackTrace();
+		if (address != null) {
+			TSocket tsocket = new TSocket(address.getHostName(), address.getPort());
+			TTransport transport = new TFramedTransport(tsocket);
+			TProtocol protocol = new TBinaryProtocol(transport);
+			client = this.clientFactory.getClient(protocol);
+			transport.open();
+			if (callback != null) {
+				try {
+					callback.make(client);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return client;

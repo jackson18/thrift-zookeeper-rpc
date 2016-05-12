@@ -19,7 +19,6 @@ import com.facebook.nifty.core.ThriftServerDefBuilder;
 import com.qijiabin.demo.exception.ThriftException;
 import com.qijiabin.demo.monitor.ServiceProxy;
 import com.qijiabin.demo.monitor.statistic.MonitorService;
-import com.qijiabin.demo.monitor.statistic.support.SimpleMonitorService;
 import com.qijiabin.demo.zookeeper.AddressRegister;
 import com.qijiabin.demo.zookeeper.IPResolve;
 import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
@@ -66,7 +65,7 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (isMonitor) {
-			this.monitorService = new SimpleMonitorService();
+			this.monitorService.start();
 		}
 		if (ipResolve == null) {
 			ipResolve = new LocalNetworkIPResolve();
@@ -198,6 +197,14 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 
 	public void setIsMonitor(Boolean isMonitor) {
 		this.isMonitor = isMonitor;
+	}
+
+	public MonitorService getMonitorService() {
+		return monitorService;
+	}
+
+	public void setMonitorService(MonitorService monitorService) {
+		this.monitorService = monitorService;
 	}
 
 }

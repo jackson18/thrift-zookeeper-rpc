@@ -173,7 +173,7 @@ public class SimpleVisualService implements VisualService{
         xyplot.setRangeGridlinesVisible(true);
         DateAxis dateaxis = (DateAxis) xyplot.getDomainAxis();
         dateaxis.setDateFormatOverride(new SimpleDateFormat("HH:mm"));
-        BufferedImage image = jfreechart.createBufferedImage(600, 300);
+        BufferedImage image = jfreechart.createBufferedImage(1500, 350);
         try {
             if (logger.isInfoEnabled()) {
                 logger.info("write chart: {}", path);

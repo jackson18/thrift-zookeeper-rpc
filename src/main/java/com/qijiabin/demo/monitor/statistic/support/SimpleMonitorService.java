@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,24 +33,18 @@ public class SimpleMonitorService implements MonitorService{
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleMonitorService.class);
 	private final ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<String, AtomicInteger>();
-	private final BlockingQueue<Statistics> queue;
-	private final Thread writeThread;
+	private final BlockingQueue<Statistics> queue = new LinkedBlockingQueue<Statistics>(100000);
 	private volatile boolean running = true;
 	private static SimpleMonitorService INSTANCE = null;
 	// 定时任务执行器
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    // 图表绘制定时器
-    @SuppressWarnings("unused")
-	private final ScheduledFuture<?> chartFuture;
-    
 
 	public static SimpleMonitorService getInstance() {
         return INSTANCE;
     }
 	
-	public SimpleMonitorService() {
-		queue = new LinkedBlockingQueue<Statistics>(100000);
-        writeThread = new Thread(new Runnable() {
+	public void start() {
+        Thread writeThread = new Thread(new Runnable() {
             public void run() {
                 while (running) {
                     try {
@@ -70,7 +63,7 @@ public class SimpleMonitorService implements MonitorService{
         writeThread.setName("SimpleMonitorAsyncWriteLogThread");
         writeThread.start();
         
-        chartFuture = scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 try {
                     new SimpleVisualService().draw(); // 绘制图表
