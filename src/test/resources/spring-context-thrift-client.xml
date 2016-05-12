@@ -8,21 +8,6 @@
 				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd"
 	default-lazy-init="false">
 	
-	<!-- 客户端配置方式一 -->
-	<!-- fixedAddress -->
-	<bean id="fixedAddressProvider" class="com.qijiabin.demo.zookeeper.support.FixedAddressProvider">
-		 <property name="service" value="com.qijiabin.thrift.rpc.demo.HelloWorldService" />
-         <property name="serverAddress" value="192.168.1.87:9000:1,192.168.1.87:9001:2" />
-	</bean>
-	
-    <bean id="helloSerivce" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory">
-        <property name="maxActive" value="5" />
-        <property name="idleTime" value="10000" />
-        <property name="serverAddressProvider" ref="fixedAddressProvider" />
-    </bean>
-    
-    
-    <!-- 客户端配置方式二 -->
     <!-- zookeeper   -->
     <bean id="zookeeper" class="com.qijiabin.demo.zookeeper.support.ZookeeperFactory" destroy-method="close">
 		<property name="zkHosts" value="192.168.1.66:2181" />

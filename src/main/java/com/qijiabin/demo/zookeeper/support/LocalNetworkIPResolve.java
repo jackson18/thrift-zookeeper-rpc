@@ -45,7 +45,7 @@ public class LocalNetworkIPResolve implements IPResolve {
 					}
 					if (address.isSiteLocalAddress() && !address.isLoopbackAddress()) {
 						serverIp = address.getHostAddress();
-						logger.info("resolve server ip :"+ serverIp);
+						logger.info("resolve server ip : {}", serverIp);
 						continue;
 					}
 				}

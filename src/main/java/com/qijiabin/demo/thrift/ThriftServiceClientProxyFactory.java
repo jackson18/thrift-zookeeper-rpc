@@ -36,18 +36,18 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private AddressProvider serverAddressProvider;
 	private Object proxyClient;
 	private Class<?> objectClass;
-	private GenericObjectPool<TServiceClient> pool;
+	private volatile GenericObjectPool<TServiceClient> pool;
 
 	
 	private PoolOperationCallBack callback = new PoolOperationCallBack() {
 		@Override
 		public void make(TServiceClient client) {
-			log.info("create");
+			log.info("**********--->create client connection");
 		}
 
 		@Override
 		public void destroy(TServiceClient client) {
-			log.info("destroy");
+			log.info("**********--->client connection destroy");
 		}
 	};
 	
@@ -57,6 +57,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		serverAddressProvider.bindPool(pool);
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// 加载Iface接口
 		objectClass = classLoader.loadClass(serverAddressProvider.getService() + "$Iface");

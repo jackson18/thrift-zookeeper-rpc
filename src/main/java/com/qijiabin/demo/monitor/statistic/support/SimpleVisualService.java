@@ -176,7 +176,7 @@ public class SimpleVisualService implements VisualService{
         BufferedImage image = jfreechart.createBufferedImage(600, 300);
         try {
             if (logger.isInfoEnabled()) {
-                logger.info("write chart: " + path);
+                logger.info("write chart: {}", path);
             }
             File methodChartFile = new File(path);
             File methodChartDir = methodChartFile.getParentFile();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -16,6 +17,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache.StartMode;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.thrift.TServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -53,6 +55,8 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	private PathChildrenCache cachedPath;
 	//zk客户端连接
 	private CuratorFramework zkClient;
+	// 关联GenericObjectPool
+	private GenericObjectPool<TServiceClient> pool;
 	
 	
 	public ZookeeperAddressProvider() {
@@ -98,13 +102,13 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 				PathChildrenCacheEvent.Type eventType = event.getType();
 				switch (eventType) {
 				case CONNECTION_RECONNECTED:
-					logger.info("Connection is reconection.");
+					logger.info("***************--->Connection is reconection.");
 					break;
 				case CONNECTION_SUSPENDED:
-					logger.info("Connection is suspended.");
+					logger.info("**************--->Connection is suspended.");
 					break;
 				case CONNECTION_LOST:
-					logger.warn("Connection error,waiting...");
+					logger.warn("****************--->Connection error,waiting...");
 					return;
 				default:
 				}
@@ -120,16 +124,16 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 					// 但是,有可能,thrift client与thrift server之间的网络是良好的
 					// 因此此处是否需要清空container,是需要多方面考虑的.
 					container.clear();
-					logger.error("thrift server-cluster error....");
+					logger.error("*****************--->thrift server-cluster error....");
 					return;
 				}
 				List<InetSocketAddress> current = new ArrayList<InetSocketAddress>();
 				String path = null;
 				for (ChildData data : children) {
 					path = data.getPath();
-					logger.debug("get path:"+path);
+					logger.debug("**************--->get path:{}", path);
 					path = path.substring(getServicePath().length()+1);
-					logger.debug("get serviceAddress:"+path);
+					logger.debug("****************--->get serviceAddress:{}", path);
 					String address = new String(path.getBytes(), "utf-8");
 					current.addAll(transfer(address));
 					trace.add(address);
@@ -140,7 +144,9 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 					container.addAll(current);
 					inner.clear();
 					inner.addAll(current);
-
+					if (pool != null) {
+						pool.clear();
+					}
 				}
 			}
 		});
@@ -211,6 +217,10 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	@Override
 	public String getService() {
 		return service;
+	}
+	
+	public void bindPool(GenericObjectPool<TServiceClient> pool) {
+		this.pool = pool;
 	}
 	
 	public void setService(String service) {
