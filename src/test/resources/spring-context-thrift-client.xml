@@ -26,8 +26,11 @@
     
 	<!-- client Proxy -->
     <bean id="helloSerivce2" class="com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory" destroy-method="close">
-        <property name="maxActive" value="5" />
+        <property name="maxActive" value="20"/>
+        <property name="maxIdle" value="1"/>
+        <property name="minIdle" value="0"/>
         <property name="idleTime" value="1800000" />
+        <property name="maxWaitMillis" value="-1"/>
         <property name="serverAddressProvider" ref="addressProvider"/>
     </bean>
     
