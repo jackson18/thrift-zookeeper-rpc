@@ -3,7 +3,7 @@ package com.qijiabin.demo.zookeeper;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.thrift.TServiceClient;
 
 /**

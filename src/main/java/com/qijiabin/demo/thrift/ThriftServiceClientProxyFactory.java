@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.thrift.TServiceClient;
 import org.apache.thrift.TServiceClientFactory;
 import org.slf4j.Logger;
@@ -31,6 +33,9 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private static final Logger log = LoggerFactory.getLogger(ThriftServiceClientProxyFactory.class);
 	// 最大活跃连接数
 	private Integer maxActive = 32;
+	private Integer maxIdle = 1; 
+	private Integer minIdle = 0;
+	private Long	maxWaitMillis = -1l;
 	// 连接空闲时间，默认3分钟，-1：关闭空闲检测
 	private Integer idleTime = 180000;
 	private AddressProvider serverAddressProvider;
@@ -46,7 +51,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		}
 
 		@Override
-		public void destroy(TServiceClient client) {
+		public void destroy(PooledObject<TServiceClient> client) {
 			log.info("**********--->client connection destroy");
 		}
 	};
@@ -65,11 +70,17 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		Class<TServiceClientFactory<TServiceClient>> fi = (Class<TServiceClientFactory<TServiceClient>>) classLoader.loadClass(serverAddressProvider.getService() + "$Client$Factory");
 		TServiceClientFactory<TServiceClient> clientFactory = fi.newInstance();
 		ThriftClientPoolFactory clientPool = new ThriftClientPoolFactory(serverAddressProvider, clientFactory, callback);
-		GenericObjectPool.Config poolConfig = new GenericObjectPool.Config();
-		poolConfig.maxActive = maxActive;
-		poolConfig.minIdle = 0;
-		poolConfig.minEvictableIdleTimeMillis = idleTime;
-		poolConfig.timeBetweenEvictionRunsMillis = idleTime / 2L;
+		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+		poolConfig.setMaxIdle(maxIdle);
+		poolConfig.setMinIdle(minIdle);
+		poolConfig.setMaxTotal(maxActive);
+		poolConfig.setMinEvictableIdleTimeMillis(idleTime);
+		poolConfig.setTimeBetweenEvictionRunsMillis(idleTime * 2L);
+		poolConfig.setTestOnBorrow(true);
+		poolConfig.setTestOnReturn(false);
+		poolConfig.setTestWhileIdle(false);
+		poolConfig.setMaxWaitMillis(maxWaitMillis);
+		
 		pool = new GenericObjectPool<TServiceClient>(clientPool, poolConfig);
 		proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, new InvocationHandler() {
 			@Override
@@ -117,6 +128,18 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 
 	public void setServerAddressProvider(AddressProvider serverAddressProvider) {
 		this.serverAddressProvider = serverAddressProvider;
+	}
+
+	public void setMaxIdle(Integer maxIdle) {
+		this.maxIdle = maxIdle;
+	}
+
+	public void setMinIdle(Integer minIdle) {
+		this.minIdle = minIdle;
+	}
+
+	public void setMaxWaitMillis(Long maxWaitMillis) {
+		this.maxWaitMillis = maxWaitMillis;
 	}
 
 }
