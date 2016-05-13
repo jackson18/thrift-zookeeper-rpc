@@ -40,6 +40,10 @@ import com.qijiabin.demo.monitor.statistic.VisualService;
 public class SimpleVisualService implements VisualService{
 	
 	private static final Logger logger = LoggerFactory.getLogger(SimpleVisualService.class);
+	private static final SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+	private static final SimpleDateFormat sdf3 = new SimpleDateFormat("yyyyMMddHHmm");
+	private static final DecimalFormat numberFormat = new DecimalFormat("###,##0.##");
 
 	
 	/**
@@ -60,6 +64,7 @@ public class SimpleVisualService implements VisualService{
 					String methodUri = CHARTS_DIRECTORY + "/" + dateDir.getName() + "/" + serviceDir.getName() + "/"
 							+ methodDir.getName();
                 	buildChart(methodUri, methodDir, serviceDir, dateDir, "ms", SUCCESS);
+                	buildChart(methodUri, methodDir, serviceDir, dateDir, "count", ERROR);
                 	buildChart(methodUri, methodDir, serviceDir, dateDir, "count", CONCURRENT);
 				}
 			}
@@ -82,13 +87,13 @@ public class SimpleVisualService implements VisualService{
     	Map<String, Long> data = new HashMap<String, Long>();
     	double[] summary = new double[4];
     	
-    	File newFile = new File(methodDir, CONSUMER + "." + type);
+    	File newFile = new File(methodDir, PROVIDER + "." + type);
     	appendData(newFile, data, summary);
     	if (newFile.lastModified() > modified) {
     		isChanged = true;
     	}
 		if (isChanged) {
-			createChart(key, serviceDir.getName(), methodDir.getName(), dateDir.getName(), CONSUMER, data, summary,
+			createChart(key, serviceDir.getName(), methodDir.getName(), dateDir.getName(), PROVIDER, data, summary,
 					file.getAbsolutePath());
 		}
 	}
@@ -127,7 +132,7 @@ public class SimpleVisualService implements VisualService{
                     }
                 }
                 summary[3] = cnt;
-                summary[2] = sum / cnt;
+                summary[2] = cnt == 0 ? 0 : sum / cnt;
             } finally {
                 reader.close();
             }
@@ -148,13 +153,11 @@ public class SimpleVisualService implements VisualService{
 	 * @param path
 	 */
 	private static void createChart(String key, String service, String method, String date, String type, Map<String, Long> data, double[] summary, String path) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
-        DecimalFormat numberFormat = new DecimalFormat("###,##0.##");
         TimeSeriesCollection xydataset = new TimeSeriesCollection();
         TimeSeries timeseries = new TimeSeries(type);
         for (Map.Entry<String, Long> entry : data.entrySet()) {
             try {
-                timeseries.add(new Minute(dateFormat.parse(date + entry.getKey())), entry.getValue());
+                timeseries.add(new Minute(sdf3.parse(date + entry.getKey())), entry.getValue());
             } catch (ParseException e) {
                 logger.error(e.getMessage(), e);
             }
@@ -175,8 +178,8 @@ public class SimpleVisualService implements VisualService{
         dateaxis.setDateFormatOverride(new SimpleDateFormat("HH:mm"));
         BufferedImage image = jfreechart.createBufferedImage(1500, 350);
         try {
-            if (logger.isInfoEnabled()) {
-                logger.info("write chart: {}", path);
+            if (logger.isDebugEnabled()) {
+                logger.debug("write chart: {}", path);
             }
             File methodChartFile = new File(path);
             File methodChartDir = methodChartFile.getParentFile();
@@ -215,10 +218,11 @@ public class SimpleVisualService implements VisualService{
 	 */
 	private static String toDisplayDate(String date) {
         try {
-            return new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyyMMdd").parse(date));
+            return sdf1.format(sdf2.parse(date));
         } catch (ParseException e) {
             return date;
         }
     }
 
 }
+

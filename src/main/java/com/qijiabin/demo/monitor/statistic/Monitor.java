@@ -11,16 +11,18 @@ package com.qijiabin.demo.monitor.statistic;
  */
 public interface Monitor {
 
-	String CONSUMER = "consumer";
-	
-	String[] TYPES = {"success", "concurrent"};
+	String[] TYPES = {"success", "error", "concurrent"};
 	
 	String SUCCESS = "success";
 	
+	String ERROR = "error";
+	
 	String CONCURRENT = "concurrent";
 	
-	String STATISTICS_DIRECTORY = "/opt/monitor/statistics";
+	String PROVIDER = "provider";
 	
-	String CHARTS_DIRECTORY = "/opt/monitor/charts";
+	String STATISTICS_DIRECTORY = "/opt/monitor/statistic";
+	
+	String CHARTS_DIRECTORY = "/opt/monitor/chart";
 	
 }

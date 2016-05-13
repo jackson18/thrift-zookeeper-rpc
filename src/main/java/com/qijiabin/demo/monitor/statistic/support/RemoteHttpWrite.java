@@ -25,15 +25,15 @@ public class RemoteHttpWrite {
 	
 	private static final String HTTP_GET_URL = "http://localhost:8080/thrift-zookeeper-rpc-web/statistic/add";
 	
-	public static void write(Statistics statistics) {
+	public static void write(Statistic entity) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		StringBuilder sb = new StringBuilder();
-		sb.append("?service=").append(statistics.getClass().getName())
-		.append("&method=").append(statistics.getMethod().getName())
-		.append("&time=").append(statistics.getTime())
-		.append("&concurrent=").append(statistics.getConcurrent())
+		sb.append("?service=").append(entity.getClass().getName())
+		.append("&method=").append(entity.getMethod().getName())
+		.append("&time=").append(entity.getTakeTime())
+		.append("&concurrent=").append(entity.getConcurrent())
 		.append("&createTime=").append(sdf.format(new Date()))
-		.append("&isError=").append(statistics.isError() ? 1 : 0);
+		.append("&isError=").append(entity.getIsError() ? 1 : 0);
 		String loginUrl = HTTP_GET_URL + sb.toString();
 		// 使用http请求写入数据库
 		requestGet(loginUrl);

@@ -36,6 +36,6 @@
 		<property name="weight" value="1" />
 		<property name="addressRegister" ref="addressRegister" />
 		<property name="monitorService" ref="monitorService" />
-		<property name="isMonitor" value="false"/>
+		<property name="isMonitor" value="true"/>
 	</bean>
 </beans>

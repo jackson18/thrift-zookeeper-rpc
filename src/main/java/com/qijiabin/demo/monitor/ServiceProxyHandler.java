@@ -3,9 +3,6 @@ package com.qijiabin.demo.monitor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.qijiabin.demo.monitor.statistic.MonitorService;
 
 /**
@@ -20,7 +17,6 @@ import com.qijiabin.demo.monitor.statistic.MonitorService;
  */
 public class ServiceProxyHandler implements InvocationHandler{
 	
-	private static final Logger log = LoggerFactory.getLogger(ServiceProxyHandler.class);
 	private Object service;
 	private String serviceName;
 	private String serviceVersion;
@@ -46,28 +42,26 @@ public class ServiceProxyHandler implements InvocationHandler{
 		Object result=null;  
 		try{
 	        result=method.invoke(this.service, args);  
+	        if (isMonitor) {
+	        	long endTime=System.currentTimeMillis();	// 记录结束时间戮
+	        	long takeTime = endTime - startTime;
+	        	int concurrent = this.monitorService.getConcurrent(this.service.getClass(), method).get(); // 当前并发数
+	        	this.monitorService.collect(serviceName, serviceVersion, this.service.getClass(), 
+	        			method, args, concurrent, takeTime, false);
+	        }
 		}catch(Exception e){
 			if (isMonitor) {
-				monitorService.collect(this.service.getClass(), method, startTime, true);
+				long endTime=System.currentTimeMillis();	// 记录结束时间戮
+				long takeTime = endTime - startTime;
+				int concurrent = this.monitorService.getConcurrent(this.service.getClass(), method).get(); // 当前并发数
+				this.monitorService.collect(serviceName, serviceVersion, this.service.getClass(), 
+						method, args, concurrent, takeTime, true);
 			}
 			throw e;
 		} finally {
 			if (isMonitor) {
-				monitorService.collect(this.service.getClass(), method, startTime, false);
-				monitorService.getConcurrent(this.service.getClass(), method).decrementAndGet(); // 并发计数
+				this.monitorService.getConcurrent(this.service.getClass(), method).decrementAndGet(); // 并发计数
 			}
-		}
-		
-		long endTime=System.currentTimeMillis();	// 记录结束时间戮
-		if(log.isDebugEnabled()){
-			if(args!=null) {
-				for(int i=0;i<args.length;i++){
-					log.debug("*************--->service arg.{}={}", i, args[i]==null?"null":args[i].toString());
-				}
-			}
-			log.debug("*************--->serviceName:{},serviceVersion:{}", this.serviceName, this.serviceVersion);
-			log.debug("*************--->call {} cost time={}", method.getName(), (endTime-startTime));
-			log.debug("************--->call {} result={}", method.getName(), (result==null?"null":result.toString()));
 		}
 		return result;
 	}

@@ -1,8 +1,8 @@
 package com.qijiabin.demo.monitor.statistic;
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.qijiabin.demo.monitor.statistic.support.Statistics;
 
 
 /**
@@ -15,31 +15,30 @@ import com.qijiabin.demo.monitor.statistic.support.Statistics;
  * ========================================================
  * 修订日期     修订人    描述
  */
-public interface MonitorService extends Monitor{
+public abstract class MonitorService implements Monitor{
+	
+	private final ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<String, AtomicInteger>();
 	
 	/**
-	 * 启动监控服务
+	 * 监控服务启动后会调用此方法
 	 */
-	public void start();
+	public abstract void start();
 	
 	/**
-	 * 监控数据采集
-	 * 记录监控来源主机，应用，接口，方法信息
-	 * 记录调用的成功次数，失败次数，成功调用总耗时，平均时间将用总耗时除以成功次数
-	 * @param statistics
+	 * 监控统计数据采集
+	 * 记录每次调用的服务名，服务版本，接口，方法，方法参数，并发数，耗时，调用是否成功
+	 * @param serviceName
+	 * @param serviceVersion
+	 * @param clazz
+	 * @param method
+	 * @param args
+	 * @param concurrent
+	 * @param takeTime
+	 * @param isError
 	 */
-    public void collect(Statistics statistics);
-    
-    /**
-     * 监控数据采集
-	 * 记录监控来源主机，应用，接口，方法信息
-	 * 记录调用的成功次数，失败次数，成功调用总耗时，平均时间将用总耗时除以成功次数
-     * @param clazz
-     * @param method
-     * @param start
-     * @param error
-     */
-    public void collect(Class<?> clazz, Method method, long start, boolean error);
+    @SuppressWarnings("rawtypes")
+	public abstract void collect(String serviceName, String serviceVersion, Class clazz, Method method, 
+    		Object[] args, int concurrent, long takeTime, boolean isError);
     
     /**
 	 * 获取并发计数器
@@ -47,6 +46,14 @@ public interface MonitorService extends Monitor{
 	 * @param method
 	 * @return
 	 */
-    public AtomicInteger getConcurrent(Class<?> clazz, Method method);
+    public AtomicInteger getConcurrent(Class<?> clazz, Method method) {
+        String key = clazz.getName() + "." + method.getName();
+        AtomicInteger concurrent = concurrents.get(key);
+        if (concurrent == null) {
+            concurrents.putIfAbsent(key, new AtomicInteger());
+            concurrent = concurrents.get(key);
+        }
+        return concurrent;
+    }
 
 }
