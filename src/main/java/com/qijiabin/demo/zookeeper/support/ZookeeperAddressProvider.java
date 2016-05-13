@@ -25,6 +25,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.qijiabin.demo.thrift.ThriftServiceClientProxyFactory;
 import com.qijiabin.demo.zookeeper.AddressProvider;
 
 /**
@@ -84,8 +85,8 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		ZookeeperAddressProvider addressProvider = (ZookeeperAddressProvider) applicationContext.getBean("addressProvider");
-		this.pool = addressProvider.pool;
+		ThriftServiceClientProxyFactory clientProxyFactory = (ThriftServiceClientProxyFactory) applicationContext.getBean(ThriftServiceClientProxyFactory.class);
+		this.pool = clientProxyFactory.getPool();
 	}
 
 	/**

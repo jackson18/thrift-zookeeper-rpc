@@ -17,7 +17,7 @@ public class HelloWorldServiceImpl implements HelloWorldService.Iface {
 	@Override
 	public String sayHello(String username) throws TException {
 		try {
-			Thread.sleep(300);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

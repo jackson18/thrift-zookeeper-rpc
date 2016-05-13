@@ -141,4 +141,12 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		this.maxWaitMillis = maxWaitMillis;
 	}
 
+	public GenericObjectPool<TServiceClient> getPool() {
+		return pool;
+	}
+
+	public void setPool(GenericObjectPool<TServiceClient> pool) {
+		this.pool = pool;
+	}
+
 }
