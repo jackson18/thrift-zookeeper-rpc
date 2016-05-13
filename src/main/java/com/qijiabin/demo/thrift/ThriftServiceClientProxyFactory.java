@@ -62,7 +62,6 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		serverAddressProvider.bindPool(pool);
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// 加载Iface接口
 		objectClass = classLoader.loadClass(serverAddressProvider.getService() + "$Iface");

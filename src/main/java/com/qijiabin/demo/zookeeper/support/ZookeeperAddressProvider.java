@@ -20,7 +20,10 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.thrift.TServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import com.qijiabin.demo.zookeeper.AddressProvider;
 
@@ -34,7 +37,7 @@ import com.qijiabin.demo.zookeeper.AddressProvider;
  * ========================================================
  * 修订日期     修订人    描述
  */
-public class ZookeeperAddressProvider implements AddressProvider, InitializingBean {
+public class ZookeeperAddressProvider implements AddressProvider, InitializingBean, ApplicationContextAware  {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	// 服务版本号
@@ -77,6 +80,12 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 		}
 		buildPathChildrenCache(zkClient, getServicePath(), true);
 		cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
+	}
+	
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		ZookeeperAddressProvider addressProvider = (ZookeeperAddressProvider) applicationContext.getBean("addressProvider");
+		this.pool = addressProvider.pool;
 	}
 
 	/**
@@ -219,10 +228,6 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 		return service;
 	}
 	
-	public void bindPool(GenericObjectPool<TServiceClient> pool) {
-		this.pool = pool;
-	}
-	
 	public void setService(String service) {
 		this.service = service;
 	}
@@ -236,3 +241,4 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	}
 
 }
+

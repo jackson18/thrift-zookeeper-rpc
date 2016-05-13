@@ -3,9 +3,6 @@ package com.qijiabin.demo.zookeeper;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.thrift.TServiceClient;
-
 /**
  * ========================================================
  * 日 期：2016年4月12日 上午10:30:31
@@ -40,12 +37,6 @@ public interface AddressProvider {
      * 关闭服务连接
      */
     public void close();
-    
-    /**
-     * 关联客户端连接池,当zk节点变更rebuild时，会通知pool进行重建
-     * @param pool
-     */
-    public void bindPool(GenericObjectPool<TServiceClient> pool);
     
 }
 
