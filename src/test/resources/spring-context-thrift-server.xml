@@ -11,7 +11,7 @@
 	default-lazy-init="false">
 	
 	<!-- monitor -->
-	<bean id="monitorService" class="com.qijiabin.demo.monitor.statistic.support.SimpleMonitorService"/>
+	<bean id="simpleMonitorService" class="com.qijiabin.demo.monitor.statistic.support.SimpleMonitorService"/>
 	
 	<!-- zookeeper -->
 	<bean id="zookeeper" class="com.qijiabin.demo.zookeeper.support.ZookeeperFactory" destroy-method="close">
@@ -35,7 +35,11 @@
 		<property name="version" value="1.0.0" />
 		<property name="weight" value="1" />
 		<property name="addressRegister" ref="addressRegister" />
-		<property name="monitorService" ref="monitorService" />
+		<!-- 是否使用优雅退出 默认false 如果使用程序请使用kill,不要使用kill -9 -->
+		<property name="zooniftyShutdownHook" value="false"/>
+		<!-- 框架自带simpleMonitorService -->
+		<property name="monitorService" ref="simpleMonitorService" />
+		<!-- true:监控开启 false:监控关闭 默认false -->
 		<property name="isMonitor" value="true"/>
 	</bean>
 </beans>
