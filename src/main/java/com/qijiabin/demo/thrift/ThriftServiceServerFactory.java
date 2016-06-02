@@ -34,9 +34,9 @@ import com.qijiabin.demo.zookeeper.support.LocalNetworkIPResolve;
  */
 public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 	
-	private static final int BOSS_THREAD_DEFAULT_COUNT = 1;
-	private static final int WORKER_THREAD_DEFAULT_COUNT = 4;
-	private static final Boolean ZK_NIFTY_SHUTDOWN_HOOK = false;
+	private int BOSS_THREAD_DEFAULT_COUNT = 1;
+	private int WORKER_THREAD_DEFAULT_COUNT = 4;
+	private Boolean zooniftyShutdownHook = false;
 	//服务名称
 	private String name;
 	private String hostname = null;
@@ -119,7 +119,7 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 			addressRegister.register(serviceName, version, hostname);
 		}
 		//清理资源钩子
-		if (ZK_NIFTY_SHUTDOWN_HOOK) {
+		if (zooniftyShutdownHook) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 	            public void run() {  
 	                try {  
@@ -205,6 +205,14 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 
 	public void setMonitorService(MonitorService monitorService) {
 		this.monitorService = monitorService;
+	}
+
+	public Boolean getZooniftyShutdownHook() {
+		return zooniftyShutdownHook;
+	}
+
+	public void setZooniftyShutdownHook(Boolean zooniftyShutdownHook) {
+		this.zooniftyShutdownHook = zooniftyShutdownHook;
 	}
 
 }
