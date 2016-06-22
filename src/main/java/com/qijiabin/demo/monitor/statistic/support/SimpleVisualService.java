@@ -59,13 +59,16 @@ public class SimpleVisualService implements VisualService{
 		for (File dateDir : dateDirs) {
 			File[] serviceDirs = dateDir.listFiles();
 			for (File serviceDir : serviceDirs) {
-				File[] methodDirs = serviceDir.listFiles();
-				for (File methodDir : methodDirs) {
-					String methodUri = CHARTS_DIRECTORY + "/" + dateDir.getName() + "/" + serviceDir.getName() + "/"
-							+ methodDir.getName();
-                	buildChart(methodUri, methodDir, serviceDir, dateDir, "ms", SUCCESS);
-                	buildChart(methodUri, methodDir, serviceDir, dateDir, "count", ERROR);
-                	buildChart(methodUri, methodDir, serviceDir, dateDir, "count", CONCURRENT);
+				File[] versionDirs = serviceDir.listFiles();
+				for (File versionDir : versionDirs) {
+					File[] methodDirs = versionDir.listFiles();
+					for (File methodDir : methodDirs) {
+						String methodUri = CHARTS_DIRECTORY + "/" + dateDir.getName() + "/" + serviceDir.getName() + "/"
+								+ versionDir.getName() + "/" + methodDir.getName();
+						buildChart(methodUri, methodDir, serviceDir, dateDir, "ms", SUCCESS);
+						buildChart(methodUri, methodDir, serviceDir, dateDir, "count", ERROR);
+						buildChart(methodUri, methodDir, serviceDir, dateDir, "count", CONCURRENT);
+					}
 				}
 			}
 		}

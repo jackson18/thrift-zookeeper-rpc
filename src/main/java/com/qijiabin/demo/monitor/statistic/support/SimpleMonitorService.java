@@ -80,6 +80,7 @@ public class SimpleMonitorService extends MonitorService{
         	String filename = STATISTICS_DIRECTORY 
         			+ "/" + day 
         			+ "/" + entity.getServiceName()
+        			+ "/" + entity.getServiceVersion()
         			+ "/" + entity.getMethod().getName()
         			+ "/" + PROVIDER + "." + type;
         	File file = new File(filename);
@@ -118,7 +119,7 @@ public class SimpleMonitorService extends MonitorService{
 	@Override
 	public void collect(String serviceName, String serviceVersion, Class clazz, Method method, Object[] args,
 			int concurrent, long takeTime, boolean isError) {
-		Statistic entity = new Statistic(serviceName, method, concurrent, takeTime, isError);
+		Statistic entity = new Statistic(serviceName, serviceVersion, method, concurrent, takeTime, isError);
 		collect(entity);
 	}
 

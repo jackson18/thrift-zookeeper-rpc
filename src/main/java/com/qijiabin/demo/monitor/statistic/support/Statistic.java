@@ -17,9 +17,10 @@ public class Statistic {
 	public Statistic() {
 	}
 	
-	public Statistic(String serviceName, Method method, int concurrent, long takeTime, boolean isError) {
+	public Statistic(String serviceName, String serviceVersion, Method method, int concurrent, long takeTime, boolean isError) {
 		super();
 		this.serviceName = serviceName;
+		this.serviceVersion = serviceVersion;
 		this.method = method;
 		this.concurrent = concurrent;
 		this.takeTime = takeTime;
