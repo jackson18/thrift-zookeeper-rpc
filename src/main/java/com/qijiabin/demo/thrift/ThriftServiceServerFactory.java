@@ -82,7 +82,8 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 		if (interfaces.length == 0) {
 			throw new IllegalClassFormatException("service-class should implements Iface");
 		}
-		// reflect,load "Processor";
+		
+		// 通过反射，获取处理器
 		TProcessor processor = null;
 		String serviceName = null;
 		for (Class<?> clazz : interfaces) {
@@ -108,17 +109,23 @@ public class ThriftServiceServerFactory implements InitializingBean, Closeable {
 		if (processor == null) {
 			throw new IllegalClassFormatException("service-class should implements Iface");
 		}
-		thriftServerDefBuilder = new ThriftServerDefBuilder()
-				.listen(port)
-				.withProcessor(processor);
+		
+		// 设置服务器配置
+		thriftServerDefBuilder = new ThriftServerDefBuilder().listen(port).withProcessor(processor);
+		
+		// 设置服务器通道
 		server = new NettyServerTransport(thriftServerDefBuilder.build(),
 				defaultThriftServerConfigBuilder().build(),new DefaultChannelGroup());
+		
+		// 开启服务
 		server.start();
+		
 		// 注册服务
 		if (addressRegister != null) {
 			addressRegister.register(serviceName, version, hostname);
 		}
-		//清理资源钩子
+		
+		// 在关机或重启时停止服务器，并移除zk上注册的服务
 		if (zooniftyShutdownHook) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 	            public void run() {  
