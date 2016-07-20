@@ -42,4 +42,18 @@
 		<!-- true:监控开启 false:监控关闭 默认false -->
 		<property name="isMonitor" value="true"/>
 	</bean>
+	<bean id="helloSerivce2" class="com.qijiabin.demo.thrift.ThriftServiceServerFactory" destroy-method="close">
+		<property name="service" ref="helloSerivceImpl" />
+		<property name="name" value="HelloService2"/>
+		<property name="port" value="9001" />
+		<property name="version" value="1.0.0" />
+		<property name="weight" value="1" />
+		<property name="addressRegister" ref="addressRegister" />
+		<!-- 是否使用优雅退出 默认false 如果使用程序请使用kill,不要使用kill -9 -->
+		<property name="zooniftyShutdownHook" value="false"/>
+		<!-- 框架自带simpleMonitorService -->
+		<property name="monitorService" ref="simpleMonitorService" />
+		<!-- true:监控开启 false:监控关闭 默认false -->
+		<property name="isMonitor" value="true"/>
+	</bean>
 </beans>

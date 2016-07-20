@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -17,7 +16,6 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache.StartMode;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
-import org.apache.thrift.TServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -50,7 +48,7 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	// 用来保存当前provider所接触过的地址记录,当zookeeper集群故障时,可以使用trace中地址,作为"备份"
 	private Set<String> trace = new HashSet<String>();
 	// IP套接字地址（IP地址+端口号）容器
-	private final List<InetSocketAddress> container = new ArrayList<InetSocketAddress>();
+	private volatile List<InetSocketAddress> container = new ArrayList<InetSocketAddress>();
 	// IP套接字地址（IP地址+端口号）队列
 	private Queue<InetSocketAddress> inner = new LinkedList<InetSocketAddress>();
 	// 注册服务
@@ -59,8 +57,7 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	private PathChildrenCache cachedPath;
 	//zk客户端连接
 	private CuratorFramework zkClient;
-	// 关联GenericObjectPool
-	private GenericObjectPool<TServiceClient> pool;
+	private ThriftServiceClientProxyFactory clientProxyFactory;
 	
 	
 	public ZookeeperAddressProvider() {
@@ -85,8 +82,7 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 	
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		ThriftServiceClientProxyFactory clientProxyFactory = (ThriftServiceClientProxyFactory) applicationContext.getBean(ThriftServiceClientProxyFactory.class);
-		this.pool = clientProxyFactory.getPool();
+		this.clientProxyFactory = (ThriftServiceClientProxyFactory) applicationContext.getBean(ThriftServiceClientProxyFactory.class);
 	}
 
 	/**
@@ -154,8 +150,10 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 					container.addAll(current);
 					inner.clear();
 					inner.addAll(current);
-					if (pool != null) {
-						pool.clear();
+					if (clientProxyFactory.getPools() != null) {
+						clientProxyFactory.getPools().clear();
+						logger.debug("***************--->清空连接池,重建");
+						clientProxyFactory.buildPools();
 					}
 				}
 			}

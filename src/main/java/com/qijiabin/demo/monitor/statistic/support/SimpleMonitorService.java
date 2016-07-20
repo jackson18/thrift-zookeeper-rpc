@@ -71,7 +71,7 @@ public class SimpleMonitorService extends MonitorService{
 	 * 将统计数据写入文件
 	 * @throws Exception
 	 */
-	private void write() throws Exception {
+	private synchronized void write() throws Exception {
 		Statistic entity = queue.take();
 		Date now = new Date();
         String day = sdf1.format(now);

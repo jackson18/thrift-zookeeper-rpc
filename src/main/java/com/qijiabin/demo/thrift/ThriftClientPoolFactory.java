@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.qijiabin.demo.exception.ThriftException;
-import com.qijiabin.demo.zookeeper.AddressProvider;
 
 
 /**
@@ -30,29 +29,24 @@ import com.qijiabin.demo.zookeeper.AddressProvider;
  */
 public class ThriftClientPoolFactory extends BasePooledObjectFactory<TServiceClient> {
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
-	private final AddressProvider serverAddressProvider;
-	private final TServiceClientFactory<TServiceClient> clientFactory;
+	private static final Logger logger = LoggerFactory.getLogger(ThriftClientPoolFactory.class);
+	private InetSocketAddress address;
+	private TServiceClientFactory<TServiceClient> clientFactory;
 	private PoolOperationCallBack callback;
 	
-	protected ThriftClientPoolFactory(AddressProvider addressProvider, TServiceClientFactory<TServiceClient> clientFactory) throws Exception {
-		this.serverAddressProvider = addressProvider;
-		this.clientFactory = clientFactory;
-	}
-
-	protected ThriftClientPoolFactory(AddressProvider addressProvider, TServiceClientFactory<TServiceClient> clientFactory,
+	protected ThriftClientPoolFactory(InetSocketAddress address2, TServiceClientFactory<TServiceClient> clientFactory,
 			PoolOperationCallBack callback) throws Exception {
-		this.serverAddressProvider = addressProvider;
+		this.address = address2;
 		this.clientFactory = clientFactory;
 		this.callback = callback;
 	}
 	
 	@Override
 	public TServiceClient create() throws Exception {
-		InetSocketAddress address = serverAddressProvider.selector();
 		if(address==null){
 			new ThriftException("No provider available for remote service");
 		}
+		
 		TSocket tsocket = new TSocket(address.getHostName(), address.getPort());
 		TTransport transport = new TFramedTransport(tsocket);
 		TProtocol protocol = new TBinaryProtocol(transport);
