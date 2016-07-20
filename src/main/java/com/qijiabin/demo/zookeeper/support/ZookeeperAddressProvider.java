@@ -152,11 +152,6 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 					container.addAll(current);
 					inner.clear();
 					inner.addAll(current);
-//					if (clientProxyFactory.getPools() != null) {
-//						clientProxyFactory.getPools().clear();
-//						logger.debug("***************--->清空连接池,重建");
-//						clientProxyFactory.buildPools();
-//					}
 					
 					if (clientProxyFactory.getPools() != null) {
 						for (GenericObjectPool<TServiceClient> pool : clientProxyFactory.getPools()) {
@@ -165,7 +160,6 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 						clientProxyFactory.getPools().clear();
 						logger.debug("***************--->清空连接池,重建");
 						clientProxyFactory.buildPools();
-						
 					}
 				}
 			}
