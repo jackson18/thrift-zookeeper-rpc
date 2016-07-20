@@ -70,9 +70,6 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		objectClass = classLoader.loadClass(serverAddressProvider.getService() + "$Iface");
 		
-		Thread.sleep(5000);
-		buildPools();
-		
 		proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
