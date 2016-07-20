@@ -154,12 +154,14 @@ public class ZookeeperAddressProvider implements AddressProvider, InitializingBe
 					inner.addAll(current);
 					
 					if (clientProxyFactory.getPools() != null) {
-						for (GenericObjectPool<TServiceClient> pool : clientProxyFactory.getPools()) {
+						List<GenericObjectPool<TServiceClient>> pools = clientProxyFactory.getPools();
+						clientProxyFactory.setPools(new ArrayList<GenericObjectPool<TServiceClient>>());
+						logger.debug("***************--->重建客户端连接池");
+						clientProxyFactory.buildPools();
+						logger.debug("***************--->销毁历史连接");
+						for (GenericObjectPool<TServiceClient> pool : pools) {
 							pool.close();
 						}
-						clientProxyFactory.getPools().clear();
-						logger.debug("***************--->清空连接池,重建");
-						clientProxyFactory.buildPools();
 					}
 				}
 			}
