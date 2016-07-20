@@ -126,6 +126,11 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		}
 	}
 	
+	/**
+	 * 轮循取出连接池
+	 * @param pools
+	 * @return
+	 */
 	private GenericObjectPool<TServiceClient> getRoundRobin(List<GenericObjectPool<TServiceClient>> pools) {
 		int index = idx.incrementAndGet();
 		GenericObjectPool<TServiceClient> pool = pools.get(index % pools.size());
