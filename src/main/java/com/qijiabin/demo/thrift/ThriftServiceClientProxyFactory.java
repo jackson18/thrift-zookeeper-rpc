@@ -151,6 +151,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		List<GenericObjectPool<TServiceClient>> pools = new ArrayList<GenericObjectPool<TServiceClient>>(poolMap.values()); 
 		int index = idx.incrementAndGet();
 		GenericObjectPool<TServiceClient> pool = pools.get(index % pools.size());
+		log.debug("****************>>>当前使用连接池为： " + pool.toString());
 		return pool;
 	}
 
