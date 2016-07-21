@@ -5,7 +5,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.pool2.PooledObject;
@@ -46,7 +49,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private Object proxyClient;
 	private Class<?> objectClass;
 	private static AtomicInteger idx = new AtomicInteger(0);
-	private volatile List<GenericObjectPool<TServiceClient>> pools = new ArrayList<GenericObjectPool<TServiceClient>>();
+	private volatile Map<InetSocketAddress, GenericObjectPool<TServiceClient>> poolMap = new HashMap<InetSocketAddress, GenericObjectPool<TServiceClient>>();
 
 	
 	private PoolOperationCallBack callback = new PoolOperationCallBack() {
@@ -73,8 +76,8 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 		proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if (pools.size() > 0) {
-					GenericObjectPool<TServiceClient> pool = getRoundRobin(pools);
+				if (poolMap.size() > 0) {
+					GenericObjectPool<TServiceClient> pool = getRoundRobin(poolMap);
 					TServiceClient client = pool.borrowObject();
 					try {
 						return method.invoke(client, args);
@@ -94,34 +97,47 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	public void buildPools() {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		List<InetSocketAddress> addressList = serverAddressProvider.findServerAddressList();
-		System.out.println("size: " + addressList.size());
+		// 遍历最新的zk节点数据，根据最新的节点创建对应的pool
 		for (InetSocketAddress address : addressList) {
-			try {
-				// 加载Client.Factory类
-				Class<TServiceClientFactory<TServiceClient>> fi = (Class<TServiceClientFactory<TServiceClient>>) classLoader.loadClass(serverAddressProvider.getService() + "$Client$Factory");
-				TServiceClientFactory<TServiceClient> clientFactory = fi.newInstance();
-				ThriftClientPoolFactory clientPool = new ThriftClientPoolFactory(address, clientFactory, callback);
-				GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-				poolConfig.setMaxIdle(maxIdle);
-				poolConfig.setMinIdle(minIdle);
-				poolConfig.setMaxTotal(maxActive);
-				poolConfig.setMinEvictableIdleTimeMillis(idleTime);
-				poolConfig.setTimeBetweenEvictionRunsMillis(idleTime * 2L);
-				poolConfig.setTestOnBorrow(true);
-				poolConfig.setTestOnReturn(false);
-				poolConfig.setTestWhileIdle(false);
-				poolConfig.setMaxWaitMillis(maxWaitMillis);
-				
-				GenericObjectPool<TServiceClient> pool = new GenericObjectPool<TServiceClient>(clientPool, poolConfig);
-				pools.add(pool);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (!poolMap.containsKey(address)) {
+				try {
+					// 加载Client.Factory类
+					Class<TServiceClientFactory<TServiceClient>> fi = (Class<TServiceClientFactory<TServiceClient>>) classLoader.loadClass(serverAddressProvider.getService() + "$Client$Factory");
+					TServiceClientFactory<TServiceClient> clientFactory = fi.newInstance();
+					ThriftClientPoolFactory clientPool = new ThriftClientPoolFactory(address, clientFactory, callback);
+					GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+					poolConfig.setMaxIdle(maxIdle);
+					poolConfig.setMinIdle(minIdle);
+					poolConfig.setMaxTotal(maxActive);
+					poolConfig.setMinEvictableIdleTimeMillis(idleTime);
+					poolConfig.setTimeBetweenEvictionRunsMillis(idleTime * 2L);
+					poolConfig.setTestOnBorrow(true);
+					poolConfig.setTestOnReturn(false);
+					poolConfig.setTestWhileIdle(false);
+					poolConfig.setMaxWaitMillis(maxWaitMillis);
+					
+					GenericObjectPool<TServiceClient> pool = new GenericObjectPool<TServiceClient>(clientPool, poolConfig);
+					poolMap.put(address, pool);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} 
+		}
+		
+		// 移除不存在节点对应的pool
+		Iterator<Map.Entry<InetSocketAddress, GenericObjectPool<TServiceClient>>> it = poolMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<InetSocketAddress, GenericObjectPool<TServiceClient>> entry = it.next();
+			if (!addressList.contains(entry.getKey())) {
+				GenericObjectPool<TServiceClient> pool = entry.getValue();
+				pool.close();
+				it.remove();
 			}
 		}
 	}
@@ -131,7 +147,8 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	 * @param pools
 	 * @return
 	 */
-	private GenericObjectPool<TServiceClient> getRoundRobin(List<GenericObjectPool<TServiceClient>> pools) {
+	private GenericObjectPool<TServiceClient> getRoundRobin(Map<InetSocketAddress, GenericObjectPool<TServiceClient>> poolMap) {
+		List<GenericObjectPool<TServiceClient>> pools = new ArrayList<GenericObjectPool<TServiceClient>>(poolMap.values()); 
 		int index = idx.incrementAndGet();
 		GenericObjectPool<TServiceClient> pool = pools.get(index % pools.size());
 		return pool;
@@ -180,14 +197,6 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 
 	public void setMaxWaitMillis(Long maxWaitMillis) {
 		this.maxWaitMillis = maxWaitMillis;
-	}
-
-	public List<GenericObjectPool<TServiceClient>> getPools() {
-		return pools;
-	}
-
-	public void setPools(List<GenericObjectPool<TServiceClient>> pools) {
-		this.pools = pools;
 	}
 
 }

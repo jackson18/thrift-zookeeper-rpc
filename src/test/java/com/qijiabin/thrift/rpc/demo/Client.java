@@ -33,7 +33,7 @@ public class Client {
 			
 			HelloWorldService.Iface helloSerivce = (HelloWorldService.Iface) context.getBean("helloSerivce2");
 			ExecutorService pool = Executors.newFixedThreadPool(8);
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 100; i++) {
 				pool.submit(new TThread(helloSerivce));
 			}
 			

@@ -53,6 +53,7 @@ public class ZookeeperAddressRegister implements AddressRegister{
 				.creatingParentsIfNeeded()
 				.withMode(CreateMode.EPHEMERAL)
 				.forPath("/"+service+"/"+version+"/"+address);
+			logger.debug("register service address is :{}","/"+service+"/"+version+"/"+address);
 		} catch (UnsupportedEncodingException e) {
 			logger.error("register service address to zookeeper exception:{}",e);
 			throw new ThriftException("register service address to zookeeper exception: address UnsupportedEncodingException", e);
