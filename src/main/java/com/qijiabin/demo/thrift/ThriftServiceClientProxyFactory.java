@@ -55,12 +55,12 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	private PoolOperationCallBack callback = new PoolOperationCallBack() {
 		@Override
 		public void make(TServiceClient client) {
-			log.info("**********--->create client connection");
+			log.info("**********--->create client connection: " + client);
 		}
 
 		@Override
 		public void destroy(PooledObject<TServiceClient> client) {
-			log.info("**********--->client connection destroy");
+			log.info("**********--->client connection destroy: " + client);
 		}
 	};
 	
@@ -171,6 +171,15 @@ public class ThriftServiceClientProxyFactory implements FactoryBean, Initializin
 	}
 
 	public void close() {
+		// 清理所有连接池
+		Iterator<Map.Entry<InetSocketAddress, GenericObjectPool<TServiceClient>>> it = poolMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<InetSocketAddress, GenericObjectPool<TServiceClient>> entry = it.next();
+			GenericObjectPool<TServiceClient> pool = entry.getValue();
+			pool.close();
+			it.remove();
+		}
+		
 		if (serverAddressProvider != null) {
 			serverAddressProvider.close();
 		}
